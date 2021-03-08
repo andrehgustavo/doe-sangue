@@ -29,10 +29,11 @@ In this programming project we will develop a system to facilitate blood donatio
 
 
 ## Endpoints
-    - List all users ("/users")
-    - Add new user ("/users/add")
-    - Read a user ("/users/edit/id")
-    - Update a user ("/users/edit/id")
-    - Delete a user ("/users/delete/id")
-    - Schedulle ("/users/id/schedulle)
-    - Status ("/users/id/status")
+    - [GET] List all users ("/users")
+    - [POST] Add new user ("/users")
+    - [GET] Read a user ("/users/id")
+    - [PUT] Update a user ("/users/id")
+    - [DELETE] Delete a user ("/users/id")
+    - [POST] Schedulle ("/users/id/schedulle)
+    - [GET] Schedulle ("/users/id/schedulle)
+    - [GET] Status ("/users/id/status")
