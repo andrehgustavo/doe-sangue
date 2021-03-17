@@ -12,9 +12,9 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
         App::new()
             .route("/ping", web::get().to(ping))
             .route("/users", web::get().to(list_all))
-            .route("/users/add", web::post().to(add_user))
+            .route("/users", web::post().to(add_user))
             .route("/users/{id}", web::get().to(get_user))
-            .route("/users/edit/{id}", web::get().to(edit_user))
+            .route("/users/{id}", web::get().to(edit_user))
             //.route("/users/add", web::post().to(users::add))
             // Our pool is already wrapped in a Data: 
             // using .data would add another Arc pointer on top 
