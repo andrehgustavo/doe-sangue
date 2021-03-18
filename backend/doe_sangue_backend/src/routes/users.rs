@@ -1,46 +1,158 @@
-use actix_web::{web, HttpResponse, HttpRequest, Responder};
-use sqlx::PgPool;
-use uuid::Uuid;
+use actix_web::{web, HttpResponse};
+use serde::{Deserialize, Serialize};
+use sqlx::{types::Uuid, PgPool};
+//use uuid::Uuid;
+use super::serializers::my_uuid;
 
-#[derive(serde::Deserialize)]
-pub struct FormData {
-    email: String,
-    name: String,
-    role: String
+#[derive(Serialize, Deserialize)]
+pub struct User {
+    #[serde(with = "my_uuid")]
+    pub id: Uuid,
+    pub email: String,
+    pub name: String,
+    pub role: String,
+}
+
+#[derive(Deserialize)]
+pub struct UserData {
+    pub name: String,
+    pub email: String,
+    pub role: String,
+}
+
+
+#[derive(Serialize, Deserialize)]
+pub struct UserId {
+    #[serde(with = "my_uuid")]
+    pub id: Uuid,
 }
 
 pub async fn add_user(
-    user: web::Form<FormData>,
-    pool: web::Data<PgPool>, // Renamed!
+    user: web::Json<UserData>,
+    pool: web::Data<PgPool>,
 ) -> Result<HttpResponse, HttpResponse> {
-    sqlx::query!(
+    let row = sqlx::query!(
         r#"
-        INSERT INTO users (id, email, name, role)
+        INSERT INTO users (id, name, email, role)
         VALUES ($1, $2, $3, $4)
+        RETURNING id
         "#,
         Uuid::new_v4(),
-        user.email,
         user.name,
-        user.role
+        user.email,
+        user.role,
     )
-    // We got rid of the double-wrapping using .app_data()
-    .execute(pool.get_ref())
+    .fetch_one(pool.get_ref())
     .await
     .map_err(|e| {
         eprintln!("Failed to execute query: {}", e);
         HttpResponse::InternalServerError().finish()
     })?;
+    let tempId = UserId {
+        id: row.id,
+    };
+    Ok(HttpResponse::Ok().json(&tempId))
+}
+
+pub async fn list_all(pool: web::Data<PgPool>) -> Result<HttpResponse, HttpResponse> {
+    let rows = sqlx::query!(
+        r#"
+        SELECT id, name, email, role
+        FROM users
+        ORDER BY name
+        "#
+    )
+    .fetch_all(pool.get_ref())
+    .await
+    .map_err(|e| {
+        eprintln!("Failed to execute query: {}", e);
+        HttpResponse::InternalServerError().finish()
+    })?;
+
+    let mut users: Vec<User> = Vec::new();
+    for row in rows {
+        let user = User {
+            id: row.id,
+            name: row.name,
+            email: row.email,
+            role: row.role,
+        };
+        users.push(user);
+    }
+
+    Ok(HttpResponse::Ok().json(users))
+}
+pub async fn get_user(
+    req: web::HttpRequest,
+    pool: web::Data<PgPool>,
+) -> Result<HttpResponse, HttpResponse> {
+    let id: Uuid = req.match_info().get("id").unwrap().parse().unwrap();
+
+    let row = sqlx::query!(
+        r#"
+        SELECT id, name, email, role
+        FROM users
+        WHERE id = $1
+        "#,
+        id,
+    )
+    .fetch_one(pool.get_ref())
+    .await
+    .map_err(|e| {
+        eprintln!("Failed to execute query: {}", e);
+        HttpResponse::InternalServerError().finish()
+    })?;
+    let userTemp = User {
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        role: row.role,
+    };
+    Ok(HttpResponse::Ok().json(&userTemp))
+}
+pub async fn edit_user(
+    user: web::Json<User>,
+    pool: web::Data<PgPool>,
+) -> Result<HttpResponse, HttpResponse> {
+    sqlx::query!(
+        r#"
+        UPDATE users
+        SET name = $1, email = $2, role = $3
+        WHERE id = $4
+        "#,
+        user.name,
+        user.email,
+        user.role,
+        user.id
+    )
+    .fetch_one(pool.get_ref())
+    .await
+    .map_err(|e| {
+        eprintln!("Failed to execute query: {}", e);
+        HttpResponse::InternalServerError().finish()
+    })?;
+
     Ok(HttpResponse::Ok().finish())
 }
 
-pub async fn list_all() -> HttpResponse{
-    HttpResponse::Ok().body("Aqui serão listados todos os usuários")
-}
-pub async fn get_user(req: HttpRequest) -> impl Responder{
-    let id = req.match_info().get("id").unwrap();
-    HttpResponse::Ok().body("Listagem dos dados de um usuário específico")
-}
-pub async fn edit_user(req: HttpRequest) -> impl Responder{
-    let id = req.match_info().get("id").unwrap();
-    HttpResponse::Ok().body("Editar usuário específico")
+pub async fn delete_user(
+    req: web::HttpRequest,
+    pool: web::Data<PgPool>,
+) -> Result<HttpResponse, HttpResponse> {
+    let id: Uuid = req.match_info().get("id").unwrap().parse().unwrap();
+    sqlx::query!(
+        r#"
+        DELETE FROM users
+        WHERE id = $1
+        "#,
+        id
+    )
+    .fetch_one(pool.get_ref())
+    .await
+    .map_err(|e| {
+        eprintln!("Failed to execute query: {}", e);
+        HttpResponse::InternalServerError().finish()
+    })?;
+
+    Ok(HttpResponse::Ok().finish())
 }

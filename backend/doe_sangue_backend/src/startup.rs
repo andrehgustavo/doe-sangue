@@ -1,5 +1,5 @@
 //! src/startup.rs
-use crate::routes::{ping, add_user, list_all, get_user, edit_user};
+use crate::routes::{ping, add_user, list_all, get_user, edit_user, delete_user};
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use sqlx::PgPool;
@@ -14,7 +14,8 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
             .route("/users", web::get().to(list_all))
             .route("/users", web::post().to(add_user))
             .route("/users/{id}", web::get().to(get_user))
-            .route("/users/{id}", web::get().to(edit_user))
+            .route("/users", web::put().to(edit_user))
+            .route("/users/{id}", web::delete().to(delete_user))
             //.route("/users/add", web::post().to(users::add))
             // Our pool is already wrapped in a Data: 
             // using .data would add another Arc pointer on top 
