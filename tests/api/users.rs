@@ -92,7 +92,7 @@ async fn update_user_returns_200() {
     updated_user.insert("role", "Admin");
 
     let response = client
-        .put(&format!("{}/usuarios/{}", &app.address, previous_user_id))
+        .put(&format!("{}/users/{}", &app.address, previous_user_id))
         .header("Content-Type", "application/json")
         .json(&updated_user)
         .send()
