@@ -48,10 +48,10 @@ pub async fn add_user(
         eprintln!("Failed to execute query: {}", e);
         HttpResponse::InternalServerError().finish()
     })?;
-    let tempId = UserId {
+    let temp_id = UserId {
         id: row.id,
     };
-    Ok(HttpResponse::Ok().json(&tempId))
+    Ok(HttpResponse::Ok().json(&temp_id))
 }
 
 pub async fn list_all(pool: web::Data<PgPool>) -> Result<HttpResponse, HttpResponse> {
@@ -102,13 +102,13 @@ pub async fn get_user(
         eprintln!("Failed to execute query: {}", e);
         HttpResponse::InternalServerError().finish()
     })?;
-    let userTemp = User {
+    let user_temp = User {
         id: row.id,
         name: row.name,
         email: row.email,
         role: row.role,
     };
-    Ok(HttpResponse::Ok().json(&userTemp))
+    Ok(HttpResponse::Ok().json(&user_temp))
 }
 pub async fn edit_user(
     user: web::Json<User>,
@@ -125,7 +125,7 @@ pub async fn edit_user(
         user.role,
         user.id
     )
-    .fetch_one(pool.get_ref())
+    .execute(pool.get_ref())
     .await
     .map_err(|e| {
         eprintln!("Failed to execute query: {}", e);
@@ -147,7 +147,7 @@ pub async fn delete_user(
         "#,
         id
     )
-    .fetch_one(pool.get_ref())
+    .execute(pool.get_ref())
     .await
     .map_err(|e| {
         eprintln!("Failed to execute query: {}", e);
