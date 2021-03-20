@@ -20,10 +20,12 @@ async fn create_user_returns_200() {
         .send()
         .await
         .expect("Failed to execute request.");
-        
-    assert_eq!(200, response.status().as_u16());
+    
+        assert_eq!(200, response.status().as_u16());
+    // salva o user_id que é retornado na resposta da criação do usuário
+    let user_id: UserId = response.json().await.unwrap();
 
-    let user_from_backend = sqlx::query!("SELECT email, name, role FROM users",)
+    let user_from_backend = sqlx::query!("SELECT email, name, role FROM users WHERE id = $1", user_id.id)
         .fetch_one(&app.db_pool)
         .await
         .expect("Failed to fetch saved usuario.");
@@ -134,7 +136,7 @@ async fn delete_user_returns_200() {
     assert_eq!(200, response.status().as_u16());
 
     // finalmente, verifica se o usuário foi removido
-    let count: i64 = sqlx::query("SELECT COUNT(username) as count FROM users")
+    let count: i64 = sqlx::query("SELECT COUNT(name) as count FROM users")
         .fetch_one(&app.db_pool)
         .await
         .expect("Failed to fetch saved user.")
