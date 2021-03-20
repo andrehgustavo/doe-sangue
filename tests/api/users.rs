@@ -86,13 +86,19 @@ async fn update_user_returns_200() {
     let client = reqwest::Client::new();
     
     let previous_user_id = "b4fff169-b165-4ca3-bff4-1f1b437123a0";
-    let mut updated_user = HashMap::new();
-    updated_user.insert("name", "Updated User");
-    updated_user.insert("email", "updated@gmail.com");
-    updated_user.insert("role", "Admin");
+    let id: Uuid = Uuid::parse_str(&previous_user_id).unwrap();
+
+
+    // instancia um usuário e modifica os campos, mantendo o mesmo id
+    let updated_user = User {
+        id,
+        name: String::from("Updated User"),
+        email: String::from("updated@gmail.com"),
+        role: String::from("Admin"),
+    };
 
     let response = client
-        .put(&format!("{}/users/{}", &app.address, previous_user_id))
+        .put(&format!("{}/users", &app.address))
         .header("Content-Type", "application/json")
         .json(&updated_user)
         .send()
@@ -101,9 +107,9 @@ async fn update_user_returns_200() {
 
     assert_eq!(200, response.status().as_u16());
 
-    let user_uuid: Uuid = Uuid::parse_str(&previous_user_id).unwrap();
+    
 
-    let user_from_backend = sqlx::query!("SELECT name, email, role FROM users WHERE id = $1", user_uuid)
+    let user_from_backend = sqlx::query!("SELECT name, email, role FROM users WHERE id = $1", id)
         .fetch_one(&app.db_pool)
         .await
         .expect("Failed to fetch saved usuario.");
