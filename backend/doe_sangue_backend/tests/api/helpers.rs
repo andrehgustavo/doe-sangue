@@ -1,6 +1,6 @@
 //! tests/helpers.rs
-use webshop::configuration::{get_configuration, DatabaseSettings};
-use webshop::startup::{get_connection_pool, Application};
+use doe_sangue_backend::configuration::{get_configuration, DatabaseSettings};
+use doe_sangue_backend::startup::{get_connection_pool, Application};
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 
