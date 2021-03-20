@@ -5,7 +5,9 @@ set -eo pipefail
 DB_USER=${POSTGRES_USER:=postgres}
 DB_PASSWORD="${POSTGRES_PASSWORD:=postgres}"
 DB_NAME="${POSTGRES_DB:=doe_sangue_db}"
-DB_PORT="${POSTGRES_PORT:=3000}"
+DB_PORT="${POSTGRES_PORT:=5432}"
+#local my postgres is point to another port
+#DB_PORT="${POSTGRES_PORT:=3000}"
 
 # Allow to skip Docker if a dockerized Postgres database is already running
 if [[ -z "${SKIP_DOCKER}" ]]
