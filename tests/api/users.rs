@@ -1,6 +1,5 @@
 use crate::helpers::create_app;
 use doe_sangue_backend::routes::{User, UserId};
-use reqwest::Response;
 use std::collections::HashMap;
 use sqlx::{types::Uuid, Row};
 

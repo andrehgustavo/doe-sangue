@@ -27,6 +27,7 @@ pub struct UserId {
     pub id: Uuid,
 }
 
+#[tracing::instrument(name = "Add New User", skip(user, pool))]
 pub async fn add_user(
     user: web::Json<UserData>,
     pool: web::Data<PgPool>,
@@ -54,6 +55,7 @@ pub async fn add_user(
     Ok(HttpResponse::Ok().json(&temp_id))
 }
 
+#[tracing::instrument(name = "List all users", skip(pool))]
 pub async fn list_all(pool: web::Data<PgPool>) -> Result<HttpResponse, HttpResponse> {
     let rows = sqlx::query!(
         r#"
@@ -82,6 +84,8 @@ pub async fn list_all(pool: web::Data<PgPool>) -> Result<HttpResponse, HttpRespo
 
     Ok(HttpResponse::Ok().json(users))
 }
+
+#[tracing::instrument(name = "Get user by id", skip(req, pool))]
 pub async fn get_user(
     req: web::HttpRequest,
     pool: web::Data<PgPool>,
@@ -110,6 +114,8 @@ pub async fn get_user(
     };
     Ok(HttpResponse::Ok().json(&user_temp))
 }
+
+#[tracing::instrument(name = "Update user", skip(user, pool))]
 pub async fn edit_user(
     user: web::Json<User>,
     pool: web::Data<PgPool>,
@@ -135,6 +141,7 @@ pub async fn edit_user(
     Ok(HttpResponse::Ok().finish())
 }
 
+#[tracing::instrument(name = "Delete user", skip(req, pool))]
 pub async fn delete_user(
     req: web::HttpRequest,
     pool: web::Data<PgPool>,

@@ -1,8 +1,19 @@
 //! tests/helpers.rs
+use doe_sangue_backend::telemetry::init_subscriber;
+use doe_sangue_backend::telemetry::get_subscriber;
 use doe_sangue_backend::configuration::{get_configuration, DatabaseSettings};
 use doe_sangue_backend::startup::{get_connection_pool, Application};
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
+
+// Ensure that the `tracing` stack is only initialised once using `lazy_static`
+lazy_static::lazy_static! {
+    static ref TRACING: () = {
+        let filter = if std::env::var("TEST_LOG").is_ok() { "debug" } else { "" };
+        let subscriber = get_subscriber("test".into(), filter.into());
+        init_subscriber(subscriber);
+    };
+}
 
 pub struct TestApp {
     pub address: String,
@@ -11,6 +22,8 @@ pub struct TestApp {
 
 // Cria uma nova instância da API
 pub async fn create_app() -> TestApp {
+    lazy_static::initialize(&TRACING);
+    
     // Randomise configuration to ensure test isolation
     let configuration = {
         let mut c = get_configuration().expect("Failed to read configuration.");

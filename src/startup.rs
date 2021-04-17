@@ -27,10 +27,10 @@
 //     .run();
 //     Ok(server)
 // }
+use tracing_actix_web::TracingLogger;
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::routes::*;
 use actix_web::dev::Server;
-use actix_web::web::Data;
 use actix_web::{web, App, HttpServer};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
@@ -79,6 +79,7 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
     let db_pool = web::Data::new(db_pool);
     let server = HttpServer::new(move || {
         App::new()
+            .wrap(TracingLogger)
             .route("/ping", web::get().to(ping))
             .route("/users", web::get().to(list_all))
             .route("/users", web::post().to(add_user))
