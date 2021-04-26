@@ -16,7 +16,7 @@ actix-web = "4.0.0-beta.3"
 serde = "1.0.124"
 serde-aux = "1.0.1"
 config = { version = "0.10.1", default-features = false, features = ["yaml"] }
-sqlx = { version = "0.5.1", default-features = false, features = [ "runtime-actix-rustls", "macros", "postgres", "uuid", "migrate", "json", "offline"]  }
+sqlx = { version = "0.5.2", default-features = false, features = [ "runtime-actix-rustls", "macros", "postgres", "uuid", "migrate", "json", "offline"]  }
 uuid = { version = "0.8.2", features = ["v4"] }
 reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
 tracing = "0.1.25"
